@@ -339,27 +339,34 @@ function remove_xmlrpc_posts_and_taxonomies_methods( array $methods ): array {
 
 add_filter( 'xmlrpc_methods', __NAMESPACE__ . '\\remove_xmlrpc_posts_and_taxonomies_methods', PHP_INT_MAX );
 
-
 /**
  * Unregister Posts and Post Taxonomies Blocks
  *
- * @link   https://developer.wordpress.org/reference/hooks/init/
- * @hooked action init
+ * @link   https://developer.wordpress.org/reference/hooks/admin_print_scripts/
+ * @hooked action admin_print_scripts
  *
  * @return void
  */
 function unregister_posts_and_taxonomies_blocks(): void {
-	unregister_block_type( 'core/latest-posts' );
-	unregister_block_type( 'core/post-title' );
-	unregister_block_type( 'core/post-content' );
-	unregister_block_type( 'core/post-excerpt' );
-	unregister_block_type( 'core/post-featured-image' );
-	unregister_block_type( 'core/post-date' );
-	unregister_block_type( 'core/post-author' );
-	unregister_block_type( 'core/post-terms' );
+	$blocks = array(
+		'core/latest-posts',
+		'core/post-template',
+		'core/post-terms',
+	);
+
+	echo '<script type="text/javascript">';
+	echo "addEventListener('DOMContentLoaded', function() {";
+	echo 'window.wp.domReady( function() {';
+	foreach ( $blocks as $block ) {
+		echo "window.wp.blocks.unregisterBlockType( '" . esc_js( $block ) . "' );";
+	}
+	echo '} );';
+	echo '} );';
+	echo '</script>';
 }
 
-add_action( 'init', __NAMESPACE__ . '\\unregister_posts_and_taxonomies_blocks', PHP_INT_MAX );
+add_action( 'admin_print_scripts', __NAMESPACE__ . '\\unregister_posts_and_taxonomies_blocks', PHP_INT_MAX );
+
 
 /**
  * Unregister Posts and Post Taxonomies Widget
